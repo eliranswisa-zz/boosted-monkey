@@ -13,21 +13,24 @@ const { Extra, Markup } = require('telegraf');
 exports.getRankedInformation = (ctx, next) => {
 
     // Parse arguments 
-    parseArguments(ctx, 1);
+    parseArguments(ctx, 2);
 
-    // If no arguments supplied, using the user's pre-defined name.
-    const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
-
-    // Get summoner ranked information.
-    commandModel.getRankedInformation(summonerName, 'EUNE')
-        .then(function (result) {
-            // Reply with ranked information.
-            ctx.reply(result.rankedInformationArray ? commandModel.parseRankedInformation(result.rankedInformationArray, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
-            // Reply with general error message.
-            console.log(result.message);
-            ctx.reply('Something went wrong :(');
-        });
+    if (!validateArguments(ctx)) {
+        ctx.reply(ctx.userInfo.message);
+        next();
+    }
+    else {
+        // Get summoner ranked information.
+        commandModel.getRankedInformation(ctx.userInfo.summonerName, ctx.userInfo.region)
+            .then(function (result) {
+                // Reply with ranked information.
+                ctx.reply(result.rankedInformationArray ? commandModel.parseRankedInformation(result.rankedInformationArray, ctx.userInfo.summonerName) : result.message, { parse_mode: 'Markdown' });
+            }).catch(function (result) {
+                // Reply with general error message.
+                console.log(result.message);
+                ctx.reply('Something went wrong :(');
+            });
+    }
 };
 
 /**
@@ -38,21 +41,25 @@ exports.getRankedInformation = (ctx, next) => {
 exports.getTopMasteryChampions = (ctx, next) => {
 
     // Parse arguments 
-    parseArguments(ctx, 1);
+    parseArguments(ctx, 2);
 
-    // If no arguments supplied, using the user's pre-defined name.
-    const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
+    if (!validateArguments(ctx)) {
+        ctx.reply(ctx.userInfo.message);
+        next();
+    }
+    else {
+        // Get top mastery champions.
+        commandModel.getTopMasteryChampions(ctx.userInfo.summonerName, ctx.userInfo.region)
+            .then(function (result) {
+                // Reply with top mastery champions.
+                ctx.reply(result.topMasteryChampionsArray ? commandModel.parseTopMasteryChampions(result.topMasteryChampionsArray, ctx.userInfo.summonerName) : result.message, { parse_mode: 'Markdown' });
+            }).catch(function (result) {
+                // Reply with general error message.
+                console.log(result.message);
+                ctx.reply('Something went wrong :(');
+            });
+    }
 
-    // Get top mastery champions.
-    commandModel.getTopMasteryChampions(summonerName, 'EUNE')
-        .then(function (result) {
-            // Reply with top mastery champions.
-            ctx.reply(result.topMasteryChampionsArray ? commandModel.parseTopMasteryChampions(result.topMasteryChampionsArray, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
-            // Reply with general error message.
-            console.log(result.message);
-            ctx.reply('Something went wrong :(');
-        });
 };
 
 /**
@@ -63,19 +70,22 @@ exports.getTopMasteryChampions = (ctx, next) => {
 exports.getRecentGameInformation = (ctx, next) => {
 
     // Parse arguments 
-    parseArguments(ctx, 1);
+    parseArguments(ctx, 2);
 
-    // If no arguments supplied, using the user's pre-defined name.
-    const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
-
-    // Get summoner ranked information.
-    commandModel.getRecentGameInformation(summonerName, 'EUNE')
-        .then(function (result) {
-            ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
-            console.log(result.message);
-            ctx.reply('Something went wrong :(');
-        });
+    if (!validateArguments(ctx)) {
+        ctx.reply(ctx.userInfo.message);
+        next();
+    }
+    else {
+        // Get summoner ranked information.
+        commandModel.getRecentGameInformation(ctx.userInfo.summonerName, ctx.userInfo.region)
+            .then(function (result) {
+                ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, ctx.userInfo.summonerName) : result.message, { parse_mode: 'Markdown' });
+            }).catch(function (result) {
+                console.log(result.message);
+                ctx.reply('Something went wrong :(');
+            });
+    }
 };
 
 /**
@@ -130,11 +140,64 @@ exports.middlewarePrivileges = (ctx, next) => {
  */
 const parseArguments = (ctx, num) => {
 
-    // Remove double spaces, split by space and remove the command itself.
-    const str = ctx.message.text.replace(/  +/g, ' ');
-    const arr = str.split(' ');
-    let result = arr.splice(0, num);
-    result.push(arr.join(' '));
+    const args = [];
 
-    ctx.args = result.splice(1);
+    // Remove double spaces and split by space.
+    const formattedArguments = ctx.message.text.replace(/  +/g, ' ');
+    const argumentsArray = formattedArguments.split(' ');
+
+    // Slice the num - 1 arguments
+    const newArgumentsArray = argumentsArray.slice(1, num);
+
+    //  Combine the last argument
+    const leftoversArray = argumentsArray.slice(num);
+    const leftoversString = leftoversArray.join(' ');
+
+    if (leftoversString !== '')
+        newArgumentsArray.push(leftoversString);
+
+    ctx.args = newArgumentsArray;
+};
+
+/**
+ * Validate arguments and injects them into ctx.
+ * Valid command should look like; /command [region] summonerName
+ * Default region in case of a single argument is EUNE.
+ * @param {Object} ctx context object.
+ * @return {Boolean} Valid arguments.
+ */
+const validateArguments = (ctx) => {
+
+    ctx.userInfo = {};
+
+    // No arguments supplied - Using config.users info 
+    if (ctx.args.length == 0) {
+        ctx.userInfo.region = (config.users[ctx.message.from.username]).region;
+        ctx.userInfo.summonerName = (config.users[ctx.message.from.username]).summonerName;
+    }
+    // Single argument - Summoner name.
+    else if (ctx.args.length === 1) {
+        ctx.userInfo.region = 'EUNE';
+        ctx.userInfo.summonerName = ctx.args[0];
+    }
+    // Two arguments - region, summoner name.q
+    else if (ctx.args.length === 2) {
+
+        const formattedRegion = ctx.args[0].toUpperCase();
+        if (staticData.isValidRegion(formattedRegion)) {
+            ctx.userInfo.region = formattedRegion;
+            ctx.userInfo.summonerName = ctx.args[1];
+        }
+        else {
+            ctx.userInfo.message = 'Invalid region. \nAvailable regions: ' + staticData.getValidRegions();;
+            return false;
+        }
+    }
+    // Invalid number of arguments.
+    else {
+        ctx.userInfo.message = 'Wrong number of arguments.';
+        return false;
+    }
+
+    return true;
 };
