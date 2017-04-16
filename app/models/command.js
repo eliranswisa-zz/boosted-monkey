@@ -74,8 +74,6 @@ const getSummonerByName = (summonerName, region) => {
  */
 exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) => {
 
-    console.log(summonerName)
-
     return new Promise((fulfill, reject) => {
 
         let masteryResult = {};
