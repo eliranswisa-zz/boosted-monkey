@@ -62,34 +62,6 @@ const loadChampions = () => {
     });
 };
 
-/**
- * Checks if a given "region" is valid.
- * @param {String} region
- * @returns {Boolean} Valid region
- */
-module.exports.isValidRegion = (region) => {
-
-    const formattedRegion = region.toUpperCase().replace(/ /g, '');
-
-    return (regionalEndpoints[formattedRegion] !== undefined);
-
-};
-
-/**
- * Returns the list of available regions.
- * @returns {String} List of available regions.
- */
-module.exports.getValidRegions = () => {
-
-    let validRegions = '';
-
-    for (let key of Object.keys(regionalEndpoints)) {
-        validRegions += key + ' ';
-    }
-
-    return validRegions;
-};
-
 // Load static data.
 
 // Champion object.
