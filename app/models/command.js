@@ -31,8 +31,8 @@ const getSummonerByName = (summonerName, region) => {
             fulfill(result);
         }
         else {
-            const apiAddress = 'https://' + staticData.regionalEndpoints[region].host + '/api/lol/' + region + '/v1.4/summoner/by-name/' +
-                formattedName + '?api_key=' + config.riotAPIKey;
+            const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/api/lol/' + region + '/v1.4/summoner/by-name/' +
+                formattedName + '?api_key=' + config.riotAPIKey);
             console.info(apiAddress);
 
             // Send API request.
@@ -88,9 +88,9 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                 else {
                     // Valid summoner.
                     const summonerObject = result.summonerObject;
-                    const apiAddress = 'https://' + (staticData.regionalEndpoints[region]).host + '/championmastery/location/' +
+                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/championmastery/location/' +
                         (staticData.regionalEndpoints[region]).platformId + '/player/' + summonerObject.id +
-                        '/topchampions?count=' + amountOfChampions + '&api_key=' + config.riotAPIKey;
+                        '/topchampions?count=' + amountOfChampions + '&api_key=' + config.riotAPIKey);
                     console.info(apiAddress);
 
                     // Send API request.
@@ -155,8 +155,8 @@ exports.getRankedInformation = (summonerName, region) => {
                 else {
                     // Valid summoner.
                     const summonerObject = result.summonerObject;
-                    const apiAddress = 'https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v2.5/league/by-summoner/' +
-                        summonerObject.id + '/entry' + '?api_key=' + config.riotAPIKey;
+                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v2.5/league/by-summoner/' +
+                        summonerObject.id + '/entry' + '?api_key=' + config.riotAPIKey);
                     console.log(apiAddress);
 
                     // Send API request.
@@ -220,8 +220,8 @@ exports.getRecentGameInformation = (summonerName, region) => {
                 else {
                     // Valid summoner. 
                     const summonerObject = result.summonerObject;
-                    const apiAddress = 'https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v1.3/game/by-summoner/' +
-                        summonerObject.id + '/recent' + '?api_key=' + config.riotAPIKey;
+                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v1.3/game/by-summoner/' +
+                        summonerObject.id + '/recent' + '?api_key=' + config.riotAPIKey);
                     console.log(apiAddress);
 
                     // Send API request.
