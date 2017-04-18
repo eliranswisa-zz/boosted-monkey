@@ -34,7 +34,7 @@ const loadChampions = () => {
 
         let result = {};
 
-        const apiAddress = 'https://global.api.riotgames.com/api/lol/static-data/EUW/v1.2/champion?dataById=true&api_key=' + config.riotAPIKey;
+        const apiAddress = encodeURI('https://global.api.riotgames.com/api/lol/static-data/EUW/v1.2/champion?dataById=true&api_key=' + config.riotAPIKey);
         console.info(apiAddress);
 
         // Send API request.
