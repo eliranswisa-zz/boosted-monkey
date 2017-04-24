@@ -18,8 +18,11 @@ exports.getRankedInformation = (ctx, next) => {
     // If no arguments supplied, using the user's pre-defined name.
     const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
 
+    // If no arguments supplied, using the user's pre-defined region.
+    const region = ctx.args == '' ? (config.users[ctx.message.from.username]).region.toUpperCase() : 'EUNE';
+
     // Get summoner ranked information.
-    commandModel.getRankedInformation(summonerName, 'EUNE')
+    commandModel.getRankedInformation(summonerName, region)
         .then(function (result) {
             // Reply with ranked information.
             ctx.reply(result.rankedInformationArray ? commandModel.parseRankedInformation(result.rankedInformationArray, summonerName) : result.message, { parse_mode: 'Markdown' });
@@ -43,8 +46,11 @@ exports.getTopMasteryChampions = (ctx, next) => {
     // If no arguments supplied, using the user's pre-defined name.
     const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
 
+    // If no arguments supplied, using the user's pre-defined region.
+    const region = ctx.args == '' ? (config.users[ctx.message.from.username]).region.toUpperCase() : 'EUNE';
+
     // Get top mastery champions.
-    commandModel.getTopMasteryChampions(summonerName, 'EUNE')
+    commandModel.getTopMasteryChampions(summonerName, region)
         .then(function (result) {
             // Reply with top mastery champions.
             ctx.reply(result.topMasteryChampionsArray ? commandModel.parseTopMasteryChampions(result.topMasteryChampionsArray, summonerName) : result.message, { parse_mode: 'Markdown' });
@@ -68,8 +74,11 @@ exports.getRecentGameInformation = (ctx, next) => {
     // If no arguments supplied, using the user's pre-defined name.
     const summonerName = ctx.args == '' ? (config.users[ctx.message.from.username]).summonerName : ctx.args[0];
 
+    // If no arguments supplied, using the user's pre-defined region.
+    const region = ctx.args == '' ? (config.users[ctx.message.from.username]).region.toUpperCase() : 'EUNE';
+
     // Get summoner ranked information.
-    commandModel.getRecentGameInformation(summonerName, 'EUNE')
+    commandModel.getRecentGameInformation(summonerName, region)
         .then(function (result) {
             ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, summonerName) : result.message, { parse_mode: 'Markdown' });
         }).catch(function (result) {
