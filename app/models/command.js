@@ -194,7 +194,7 @@ exports.getRankedInformation = (summonerName, region) => {
                 reject(rankedResult);
             });
     });
-}
+};
 
 /**
  * Extracts summoner's recent game information.
@@ -259,7 +259,39 @@ exports.getRecentGameInformation = (summonerName, region) => {
                 reject(recentResult);
             });
     });
-}
+};
+
+/**
+ * Extract top N live twitch channels of League of Legends
+ * @param {Number} amountOfChannels top N channels, default is 3
+ * @returns {Promise} result
+ * @resolves {Object} result.streamInformationObject
+ * @rejects {String} result.message
+ */
+exports.getTopTwitchChannels = (amountOfChannels = 3) => {
+
+    return new Promise((fulfill, reject) => {
+
+        let result = {};
+
+        let apiAddress = encodeURI('https://api.twitch.tv/kraken/streams/?game=League of Legends&limit=' + amountOfChannels + '&client_id=' + config.twitchToken);
+        console.log(apiAddress);
+
+        request(apiAddress, (error, response, body) => {
+
+            if (error) {
+                console.error(error);
+                result.message = 'Something went wrong :(';
+                reject(result);
+            }
+            else {
+                const jsonObject = JSON.parse(body);
+                result.streamInformationObject = jsonObject;
+                fulfill(result);
+            }
+        });
+    });
+};
 
 /**
  * Parses rankedInformationArray into a string for reply.
@@ -399,4 +431,22 @@ exports.parseRecentGameInformation = (gameInformationObject, summonerName) => {
 
     return recentGameInfo;
 
+};
+
+/**
+ * Parses streamInformationObject into a string for reply.
+ * @param {Object} streamInformationObject Recent game object.
+ * @returns {String} Formatted top channels string.
+ */
+exports.parseTopTwitchChannels = (streamInformationObject) => {
+
+    let topChannelsInfo = '';
+    
+    for (let i = 0; i < streamInformationObject.streams.length; i++) {
+        topChannelsInfo += '<b>' + streamInformationObject.streams[i].channel.display_name + ' is live!</b>\n' +
+            streamInformationObject.streams[i].channel.status + ' (' + streamInformationObject.streams[i].viewers.toLocaleString('en-US') + ' viewers)\n' +
+            streamInformationObject.streams[i].channel.url + '\n\n';
+    };
+
+    return topChannelsInfo;
 };

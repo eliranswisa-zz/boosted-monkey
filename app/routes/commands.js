@@ -35,6 +35,9 @@ const commands = (app, start) => {
     // Recent game information.
     app.command("recent", commandsControllers.getRecentGameInformation);
 
+    // Top League of Legends Twitch Channels
+     app.command("twitch", commandsControllers.getTopTwitchChannels);
+
     // General error handling.
     app.catch((err) => {
         console.log('Ooops', err)
