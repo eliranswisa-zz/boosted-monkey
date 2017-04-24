@@ -23,10 +23,10 @@ exports.getRankedInformation = (ctx, next) => {
 
     // Get summoner ranked information.
     commandModel.getRankedInformation(summonerName, region)
-        .then(function (result) {
+        .then((result) => {
             // Reply with ranked information.
             ctx.reply(result.rankedInformationArray ? commandModel.parseRankedInformation(result.rankedInformationArray, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
+        }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
             ctx.reply('Something went wrong :(');
@@ -51,10 +51,10 @@ exports.getTopMasteryChampions = (ctx, next) => {
 
     // Get top mastery champions.
     commandModel.getTopMasteryChampions(summonerName, region)
-        .then(function (result) {
+        .then((result) => {
             // Reply with top mastery champions.
             ctx.reply(result.topMasteryChampionsArray ? commandModel.parseTopMasteryChampions(result.topMasteryChampionsArray, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
+        }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
             ctx.reply('Something went wrong :(');
@@ -79,9 +79,9 @@ exports.getRecentGameInformation = (ctx, next) => {
 
     // Get summoner ranked information.
     commandModel.getRecentGameInformation(summonerName, region)
-        .then(function (result) {
+        .then((result) => {
             ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, summonerName) : result.message, { parse_mode: 'Markdown' });
-        }).catch(function (result) {
+        }).catch((result) => {
             console.log(result.message);
             ctx.reply('Something went wrong :(');
         });
@@ -110,6 +110,23 @@ exports.initiateGame = (ctx, next) => {
 
     // Announce a game message.
     ctx.reply(gameMessage);
+};
+
+/**
+ * Reply top N channels for League of Legends.
+ * @param {Object} ctx context object
+ * @param {Function} next next function
+ */
+exports.getTopTwitchChannels = (ctx, next) => {
+
+    commandModel.getTopTwitchChannels()
+        .then((result) => {
+            ctx.reply(result.streamInformationObject ? commandModel.parseTopTwitchChannels(result.streamInformationObject) : result.message, Extra.HTML().webPreview(false));
+        })
+        .catch((result) => {
+            console.log(result.message);
+            ctx.reply('Something went wrong :(');
+        });
 };
 
 /**
