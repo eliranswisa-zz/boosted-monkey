@@ -98,7 +98,8 @@ exports.initiateGame = (ctx, next) => {
     parseArguments(ctx, 1);
 
     // If no arguments supplied, using a pre-defined message.
-    let gameMessage = ctx.args == '' ? 'Looking for feeders for the rift!\n' : ctx.args[0] + '\n';
+    let gameMessage = ctx.message.from.first_name + ' (' + ctx.message.from.username + ') ';
+    gameMessage += ctx.args == '' ? 'is looking for feeders for the rift!\n' : ': ' + ctx.args[0] + '\n';
 
     // Going over the users, remove the sender and users configured not the get messages.
     for (let key in config.users) {
