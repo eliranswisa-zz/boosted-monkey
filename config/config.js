@@ -1,6 +1,7 @@
 'use strict';
 
-module.exports.riotAPIKey = '<RIOT API KEY>';
+module.exports.riotAPIKey = '<RIOT TOKEN>';
+module.exports.championGGKey = '<CHAMPIONGG TOKEN>';
 module.exports.telegramToken = '<TELEGRAM TOKEN>';
 module.exports.twitchToken = '<TWITCH TOKEN>';
 
