@@ -149,7 +149,7 @@ exports.getHighestWinrateBuild = (ctx, next) => {
         })
         .catch((result) => {
             console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
+            ctx.reply(result.message);
         });
 }
 
@@ -211,8 +211,10 @@ const parseChampionName = (name) => {
         case "mumu": {
             return "Amumu";
         }
+        case "ao shin": 
+        case "ao": 
         case "aurelion": {
-            return "Aurelionsol"; ///todo
+            return "AurelionSol";
         }
         case "blitz": {
             return "Alitzcrank";
@@ -225,13 +227,13 @@ const parseChampionName = (name) => {
             return "Cassiopeia";
         }
         case "cho": {
-            return "chogatch"; //todo
+            return "Chogath";
         }
         case "mundo":
         case "drmundo":
         case "dr.mundo":
         case "dr": {
-            return "Dr. Mundo"; //todo
+            return "DrMundo";
         }
         case "eve": {
             return "Evelynn";
@@ -252,7 +254,7 @@ const parseChampionName = (name) => {
         case "j4":
         case "jarvan4":
         case "jarvan": {
-            return "Jarvan IV"//todo
+            return "JarvanIV"
         }
         case "kass": {
             return "Kassadin";
@@ -264,13 +266,13 @@ const parseChampionName = (name) => {
             return "Kha'Zix";
         }
         case "kog": {
-            return "Kog'Maw"; //todo
+            return "KogMaw";
         }
         case "lb": {
             return "LeBlanc";
         }
         case "lee": {
-            return "Lee Sin";
+            return "LeeSin";
         }
         case "leo": {
             return "Leona";
@@ -293,10 +295,10 @@ const parseChampionName = (name) => {
         case "master":
         case "master yi":
         case "yi": {
-            return "Master Yi"; //todo
+            return "MasterYi";
         }
         case "mf": {
-            return "Miss Fortune"; //todo
+            return "MissFortune";
         }
         case "morde": {
             return "Mordekaiser";
@@ -321,7 +323,7 @@ const parseChampionName = (name) => {
         }
         case "reksai":
         case "rek": {
-            return "Rek'Sai"; //todo
+            return "RekSai";
         }
         case "rene": {
             return "Renekton";
@@ -339,7 +341,7 @@ const parseChampionName = (name) => {
         }
         case "kench":
         case "tahm": {
-            return "Tahm Kench";//todo
+            return "TahmKench";
         }
         case "tali": {
             return "Taliyah";
@@ -356,12 +358,12 @@ const parseChampionName = (name) => {
         }
         case "twisted":
         case "tf": {
-            return "Twisted Fate";
+            return "TwistedFate";
         }
         case "velkoz":
         case "koz":
         case "vel": {
-            return "Vel'Koz";
+            return "Velkoz";
         }
         case "vladi":
         case "vlad": {
@@ -373,11 +375,13 @@ const parseChampionName = (name) => {
         case "ww": {
             return "Warwick";
         }
-        case "wu": {
-            return "Wukong";
+        case "wu": 
+        case "wu kong": 
+        case "wukong": {
+            return "MonkeyKing";
         }
         case "xin": {
-            return "Xin Zhao"; //todo
+            return "XinZhao";
         }
         case "cancer":
         case "salt":
