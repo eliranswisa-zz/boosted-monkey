@@ -36,7 +36,10 @@ const commands = (app, start) => {
     app.command("recent", commandsControllers.getRecentGameInformation);
 
     // Top League of Legends Twitch Channels
-     app.command("twitch", commandsControllers.getTopTwitchChannels);
+    app.command("twitch", commandsControllers.getTopTwitchChannels);
+
+    // Find build for a champion
+    app.command("build", commandsControllers.getHighestWinrateBuild);
 
     // General error handling.
     app.catch((err) => {
