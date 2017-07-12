@@ -4,7 +4,7 @@ const staticData = require('./staticData');
 const Promise = require('promise');
 const request = require('request');
 const config = require('../../config/config');
-const _ = require('lodash');
+
 /**
  * Extracts summoner information by name.
  * @param {String} summonerName Summoner name
@@ -39,7 +39,7 @@ const getSummonerByName = (summonerName, region) => {
             request(apiAddress, (error, response, body) => {
                 if (error) {
                     console.error(error);
-                    result.message = config.messages.SAD_MESSAGE;
+                    result.message = 'Something went wrong :(';
                     reject(result);
                 }
                 else if (response.statusCode == 404) {
@@ -55,65 +55,11 @@ const getSummonerByName = (summonerName, region) => {
                     fulfill(result);
                 }
                 else {
-                    result.message = config.messages.SAD_MESSAGE;
+                    result.message = 'Something went wrong :(';
                     reject(result);
                 }
             });
         }
-    });
-};
-
-/**
- * Extracts the optimal champion build according to championGG
- * @returns {promise} fulfills the champion's highest winrate data
- */
-exports.getHighestWinrateBuild = (champRole, champName) => {
-    return new Promise((fulfill, reject) => {
-
-        // Validate input (champ name)
-        let champId = getChampKeyByName(champName).id;
-        if (champId === staticData.TEEMO_ID) {
-            champName = 'Teemo';
-        } else {
-            champName = champName[0].toUpperCase() + champName.toLowerCase().slice(1);
-        }
-
-        let result = {};
-
-        let apiAddress = encodeURI(`http://api.champion.gg/v2/champions/${champId}/${champRole}?&limit=1&champData=hashes&api_key=${config.championGGKey}`);
-        console.log(apiAddress);
-
-        // Send API request
-        request(apiAddress, (error, response, body) => {
-            if (error) {
-                console.error(error);
-                result.message = 'Something went wrong :(';
-                reject(result);
-            }
-            else {
-                try {
-                    let firstItems = JSON.parse(body)[0].hashes.firstitemshash.highestWinrate.hash.split('-').slice(1);
-                    let finalItems = JSON.parse(body)[0].hashes.finalitemshashfixed.highestWinrate.hash.split('-').slice(1);
-                    let masteries = JSON.parse(body)[0].hashes.masterieshash.highestWinrate.hash.split('-');
-                    let runes = JSON.parse(body)[0].hashes.runehash.highestWinrate.hash.split('-');
-                    let skillOrder = JSON.parse(body)[0].hashes.skillorderhash.highestWinrate.hash.split('-').slice(1);
-                    let summonerSpells = JSON.parse(body)[0].hashes.summonershash.highestWinrate.hash.split('-');
-                    var ret = "";
-                    ret += (`*${champName} ${champRole.toLowerCase()} build*\n`)
-                    ret += ("*Start with : * " + parseItems(firstItems) + '\n');
-                    ret += ("*Final build should be : *" + parseItems(finalItems) + '\n');
-                    ret += ("*Runes :*" + parseRunes(runes) + '\n');
-                    ret += ("*Skill order :* " + skillOrder + '\n');
-                    ret += ("*Summoner Spells :*" + parseSummonerSpells(summonerSpells) + '\n');
-                    ret += ("*Masteries :*" + parseMasteries(masteries) + '\n');
-                    fulfill(ret);
-                } catch (error) {
-                    console.error(error);
-                    result.message = 'Could not find build for this champion/role';
-                    reject(result);
-                }
-            }
-        });
     });
 };
 
@@ -151,7 +97,7 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                     request(apiAddress, (error, response, body) => {
                         if (error) {
                             console.error(error);
-                            masteryResult.message = config.messages.SAD_MESSAGE;
+                            masteryResult.message = 'Something went wrong :(';
                             reject(masteryResult);
                         }
                         else if (response.statusCode == 404) {
@@ -171,13 +117,13 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                             }
                         }
                         else {
-                            masteryResult.message = config.messages.SAD_MESSAGE;
+                            masteryResult.message = 'Something went wrong :(';
                             reject(masteryResult);
                         }
                     });
                 }
             }).catch((result) => {
-                ret.push(result.message);
+                console.log(result.message);
                 masteryResult.message = result.message;
                 reject(masteryResult);
             });
@@ -217,7 +163,7 @@ exports.getRankedInformation = (summonerName, region) => {
                     request(apiAddress, (error, response, body) => {
                         if (error) {
                             console.error(error);
-                            rankedResult.message = config.messages.SAD_MESSAGE;
+                            rankedResult.message = 'Something went wrong :(';
                             reject(rankedResult);
                         }
                         else if (response.statusCode == 404) {
@@ -237,7 +183,7 @@ exports.getRankedInformation = (summonerName, region) => {
                             }
                         }
                         else {
-                            rankedResult.message = config.messages.SAD_MESSAGE;
+                            rankedResult.message = 'Something went wrong :(';
                             reject(rankedResult);
                         }
                     });
@@ -282,7 +228,7 @@ exports.getRecentGameInformation = (summonerName, region) => {
                     request(apiAddress, (error, response, body) => {
                         if (error) {
                             console.error(error);
-                            recentResult.message = config.messages.SAD_MESSAGE;
+                            recentResult.message = 'Something went wrong :(';
                             reject(recentResult);
                         }
                         else if (response.statusCode == 404) {
@@ -302,7 +248,7 @@ exports.getRecentGameInformation = (summonerName, region) => {
                             }
                         }
                         else {
-                            recentResult.message = config.messages.SAD_MESSAGE;
+                            recentResult.message = 'Something went wrong :(';
                             reject(recentResult);
                         }
                     });
@@ -335,7 +281,7 @@ exports.getTopTwitchChannels = (amountOfChannels = 3) => {
 
             if (error) {
                 console.error(error);
-                result.message = config.messages.SAD_MESSAGE;
+                result.message = 'Something went wrong :(';
                 reject(result);
             }
             else {
@@ -495,7 +441,7 @@ exports.parseRecentGameInformation = (gameInformationObject, summonerName) => {
 exports.parseTopTwitchChannels = (streamInformationObject) => {
 
     let topChannelsInfo = '';
-
+    
     for (let i = 0; i < streamInformationObject.streams.length; i++) {
         topChannelsInfo += '<b>' + streamInformationObject.streams[i].channel.display_name + ' is live!</b>\n' +
             streamInformationObject.streams[i].channel.status + ' (' + streamInformationObject.streams[i].viewers.toLocaleString('en-US') + ' viewers)\n' +
@@ -504,101 +450,3 @@ exports.parseTopTwitchChannels = (streamInformationObject) => {
 
     return topChannelsInfo;
 };
-
-/**
- * Parses items by Ids into strings
- * @param {String[]} list  list of IDs
- * @returns {String[]} list of item names by ID
- */
-const parseItems = (list) => {
-    let ret = [];
-    list.forEach((data) => {
-        let dataInfo = _.filter(staticData.itemsObject, (item) => {
-            return item.id == data;
-        });
-        if (typeof (dataInfo[0]) !== 'undefined') {
-            ret.push(" " + dataInfo[0].name);
-        } else {
-            console.log("missing item info : " + data);
-        }
-    });
-    return ret;
-}
-
-/**
- * Parses runes by Ids into strings
- * @param {String[]} list  list of IDs
- * @returns {String[]} list of runes names by ID
- */
-const parseRunes = (list) => {
-    let ret = [];
-    for (let i = 0; i < list.length; i += 2) {
-        let data = list[i];
-        let dataInfo = _.filter(staticData.runesObject, (item) => {
-            return item.id == data;
-        });
-        if (typeof (dataInfo[0]) !== 'undefined') {
-            ret.push(` ${list[i + 1]}x ${dataInfo[0].name}`);
-        } else {
-            console.log("missing item info : " + data);
-        }
-    }
-    return ret;
-}
-
-/**
- * Parses summoner spells by Ids into strings
- * @param {String[]} list  list of IDs
- * @returns {String[]} list of summoner spells names by ID
- */
-const parseSummonerSpells = (list) => {
-    let ret = [];
-    list.forEach((data) => {
-        let dataInfo = _.filter(staticData.summonerSpellsObject, (item) => {
-            return item.id == data;
-        });
-        if (typeof (dataInfo[0]) !== 'undefined') {
-            ret.push(" " + dataInfo[0].name);
-        } else {
-            console.log("missing item info : " + data);
-        }
-    });
-    return ret;
-}
-
-/**
- * Parses masteries by Ids into strings
- * @param {String[]} list  list of IDs
- * @returns {String[]} list of masteries names by ID
- */
-const parseMasteries = (list) => {
-    let ret = [];
-    for (let i = 0; i < list.length; i += 2) {
-        let data = list[i];
-        let dataInfo = _.filter(staticData.masteriesObject, (item) => {
-            return item.id == data;
-        });
-        if (typeof (dataInfo[0]) !== 'undefined') {
-            ret.push(` ${list[i + 1]}x ${dataInfo[0].name}`);
-        } else {
-            console.log("missing item info : " + data);
-        }
-    }
-    return ret;
-}
-
-/**
- * Gets champion's ID by name
- * @param {String} champName chmapion name
- * @returns {string} champion's ID
- */
-const getChampKeyByName = (champName) => {
-    let result = _.filter(staticData.championsObject, (champ) => {
-        return champ.key.toLowerCase() === champName.toLowerCase();
-    });
-    if (result.length === 0) {
-        console.log("can't recognize the champion, getting teemo information instead");
-        return (getChampKeyByName('teemo'));
-    }
-    return result[0];
-}
