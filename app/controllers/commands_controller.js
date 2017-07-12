@@ -413,7 +413,7 @@ const parseRole = (role) => {
             return "JUNGLE";
         }
         case "m":
-        case "mid": 
+        case "mid":
         case "middle": {
             return "MIDDLE";
         }
@@ -424,7 +424,7 @@ const parseRole = (role) => {
         }
         case "s":
         case "sup":
-        case "supp": 
+        case "supp":
         case "support": {
             return "DUO_SUPPORT";
         }
