@@ -5,6 +5,7 @@ const staticData = require('../models/staticData');
 const config = require('../../config/config');
 const { Extra, Markup } = require('telegraf');
 
+
 /**
  * Reply ranked information.
  * @param {Object} ctx context object
@@ -29,7 +30,7 @@ exports.getRankedInformation = (ctx, next) => {
         }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
-            ctx.reply('Something went wrong :(');
+            ctx.reply(config.messages.SAD_MESSAGE);
         });
 };
 
@@ -57,7 +58,7 @@ exports.getTopMasteryChampions = (ctx, next) => {
         }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
-            ctx.reply('Something went wrong :(');
+            ctx.reply(config.messages.SAD_MESSAGE);
         });
 };
 
@@ -83,7 +84,7 @@ exports.getRecentGameInformation = (ctx, next) => {
             ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, summonerName) : result.message, { parse_mode: 'Markdown' });
         }).catch((result) => {
             console.log(result.message);
-            ctx.reply('Something went wrong :(');
+            ctx.reply(config.messages.SAD_MESSAGE);
         });
 };
 
@@ -126,9 +127,31 @@ exports.getTopTwitchChannels = (ctx, next) => {
         })
         .catch((result) => {
             console.log(result.message);
-            ctx.reply('Something went wrong :(');
+            ctx.reply(config.messages.SAD_MESSAGE);
         });
 };
+
+/**
+ * Reply a champion's highest winrate build according to championGG
+ */
+exports.getHighestWinrateBuild = (ctx, next) => {
+
+    // Parse arguments 
+    parseArguments(ctx, 2);
+    ctx.args[0] = parseRole(ctx.args[0]);
+    if (!(isRole(ctx.args[0]))) {
+        ctx.args[1] = ctx.args[0];
+        ctx.args[0] = '';
+    }
+    commandModel.getHighestWinrateBuild(ctx.args[0], parseChampionName(ctx.args[1]))
+        .then((result) => {
+            ctx.reply(result, { parse_mode: 'Markdown' });
+        })
+        .catch((result) => {
+            console.log(result.message);
+            ctx.reply(config.messages.SAD_MESSAGE);
+        });
+}
 
 /**
  * Audit commands. Acts as a middleware.
@@ -159,9 +182,253 @@ const parseArguments = (ctx, num) => {
 
     // Remove double spaces, split by space and remove the command itself.
     const str = ctx.message.text.replace(/  +/g, ' ');
-    const arr = str.split(' ');
-    let result = arr.splice(0, num);
-    result.push(arr.join(' '));
 
-    ctx.args = result.splice(1);
+    const arr = str.split(' ');
+    let ret = arr.splice(1, num - 1);
+    ret.push(arr.splice(1).join(' '));
+
+    ctx.args = ret;
+};
+
+/**
+ * checks if a given string represents a role
+ * @param {string} role
+ */
+const isRole = (role) => {
+    return (role === 'TOP' || role == 'JUNGLE' || role == 'MIDDLE' || role == 'DUO_CARRY' || role == 'DUO_SUPPORT');
+};
+
+/**
+ * parses a given name into official champion name
+ * @param {string} name  name to parse
+ *  * @returns {string} official champion name
+ */
+const parseChampionName = (name) => {
+    switch (name.toLocaleLowerCase()) {
+        case "ali": {
+            return "Alistar";
+        }
+        case "mumu": {
+            return "Amumu";
+        }
+        case "aurelion": {
+            return "Aurelionsol"; ///todo
+        }
+        case "blitz": {
+            return "Alitzcrank";
+        }
+        case "cait": {
+            return "caitlyn";
+        }
+        case "cassio":
+        case "cass": {
+            return "Cassiopeia";
+        }
+        case "cho": {
+            return "chogatch"; //todo
+        }
+        case "mundo":
+        case "drmundo":
+        case "dr.mundo":
+        case "dr": {
+            return "Dr. Mundo"; //todo
+        }
+        case "eve": {
+            return "Evelynn";
+        }
+        case "ez": {
+            return "Ezreal";
+        }
+        case "fiddle": {
+            return "Fiddlesticks";
+        }
+        case "gp": {
+            return "Gangplank";
+        }
+        case "donger":
+        case "heimer": {
+            return "Heimerdinger";
+        }
+        case "j4":
+        case "jarvan4":
+        case "jarvan": {
+            return "Jarvan IV"//todo
+        }
+        case "kass": {
+            return "Kassadin";
+        }
+        case "kata": {
+            return "Katarina";
+        }
+        case "kha": {
+            return "Kha'Zix";
+        }
+        case "kog": {
+            return "Kog'Maw"; //todo
+        }
+        case "lb": {
+            return "LeBlanc";
+        }
+        case "lee": {
+            return "Lee Sin";
+        }
+        case "leo": {
+            return "Leona";
+        }
+        case "liss": {
+            return "Lissandra";
+        }
+        case "luci": {
+            return "Lucian";
+        }
+        case "malph": {
+            return "Malphite";
+        }
+        case "malz": {
+            return "Malzahar";
+        }
+        case "mao": {
+            return "Maokai"
+        }
+        case "master":
+        case "master yi":
+        case "yi": {
+            return "Master Yi"; //todo
+        }
+        case "mf": {
+            return "Miss Fortune"; //todo
+        }
+        case "morde": {
+            return "Mordekaiser";
+        }
+        case "morg": {
+            return "Morgana";
+        }
+        case "naut": {
+            return "Nautilus";
+        }
+        case "nida": {
+            return "Nidalee";
+        }
+        case "noc": {
+            return "Nocturne";
+        }
+        case "ori": {
+            return "Orianna";
+        }
+        case "panth": {
+            return "Pantheon";
+        }
+        case "reksai":
+        case "rek": {
+            return "Rek'Sai"; //todo
+        }
+        case "rene": {
+            return "Renekton";
+        }
+        case "seju":
+        case "sej": {
+            return "Sejuani";
+        }
+        case "shyv": {
+            return "Shyvana";
+        }
+        case "banana":
+        case "raka": {
+            return "Soraka";
+        }
+        case "kench":
+        case "tahm": {
+            return "Tahm Kench";//todo
+        }
+        case "tali": {
+            return "Taliyah";
+        }
+        case "satan": {
+            return "Teemo";
+        }
+        case "trist": {
+            return "Tristana";
+        }
+        case "trynda":
+        case "trynd": {
+            return "Tryndamere";
+        }
+        case "twisted":
+        case "tf": {
+            return "Twisted Fate";
+        }
+        case "velkoz":
+        case "koz":
+        case "vel": {
+            return "Vel'Koz";
+        }
+        case "vladi":
+        case "vlad": {
+            return "Vladimir";
+        }
+        case "voli": {
+            return "Volibear";
+        }
+        case "ww": {
+            return "Warwick";
+        }
+        case "wu": {
+            return "Wukong";
+        }
+        case "xin": {
+            return "Xin Zhao"; //todo
+        }
+        case "cancer":
+        case "salt":
+        case "yass":
+        case "yas": {
+            return "Yasuo";
+        }
+        case "zil": {
+            return "Zilean";
+        }
+        default: {
+            return name;
+        }
+    }
+}
+
+/**
+ * parses a given role into official role
+ * @param {string} role role to parse
+ * @returns {string} official role
+ */
+const parseRole = (role) => {
+    switch (role.toLowerCase()) {
+        case "top":
+        case "t": {
+            return "TOP";
+        }
+        case "j":
+        case "jun":
+        case "jung":
+        case "jungl":
+        case "jungle": {
+            return "JUNGLE";
+        }
+        case "m":
+        case "mid": 
+        case "middle": {
+            return "MIDDLE";
+        }
+        case "a":
+        case "c":
+        case "adc": {
+            return "DUO_CARRY";
+        }
+        case "s":
+        case "sup":
+        case "supp": 
+        case "support": {
+            return "DUO_SUPPORT";
+        }
+        default:
+            return role;
+    };
 };
