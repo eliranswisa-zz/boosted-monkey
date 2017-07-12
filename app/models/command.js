@@ -72,8 +72,9 @@ exports.getHighestWinrateBuild = (champRole, champName) => {
 
         // Validate input (champ name)
         let champId = getChampKeyByName(champName).id;
-        if (champId === staticData.TEEMO_ID) {
-            champName = 'Teemo';
+        if (champId === config.messages.SAD_MESSAGE) {
+            result.message = 'Could not find build for this champion/role';
+            reject(result);
         } else {
             champName = champName[0].toUpperCase() + champName.toLowerCase().slice(1);
         }
@@ -87,7 +88,7 @@ exports.getHighestWinrateBuild = (champRole, champName) => {
         request(apiAddress, (error, response, body) => {
             if (error) {
                 console.error(error);
-                result.message = 'Something went wrong :(';
+                result.message = config.messages.SAD_MESSAGE;
                 reject(result);
             }
             else {
@@ -102,10 +103,10 @@ exports.getHighestWinrateBuild = (champRole, champName) => {
                     ret += (`*${champName} ${champRole.toLowerCase()} build*\n`)
                     ret += ("*Start with : * " + parseItems(firstItems) + '\n');
                     ret += ("*Final build should be : *" + parseItems(finalItems) + '\n');
-                    ret += ("*Runes :*" + parseRunes(runes) + '\n');
-                    ret += ("*Skill order :* " + skillOrder + '\n');
                     ret += ("*Summoner Spells :*" + parseSummonerSpells(summonerSpells) + '\n');
+                    ret += ("*Runes :*" + parseRunes(runes) + '\n');
                     ret += ("*Masteries :*" + parseMasteries(masteries) + '\n');
+                    ret += ("*Skill order :* " + skillOrder + '\n');
                     fulfill(ret);
                 } catch (error) {
                     console.error(error);
@@ -597,8 +598,7 @@ const getChampKeyByName = (champName) => {
         return champ.key.toLowerCase() === champName.toLowerCase();
     });
     if (result.length === 0) {
-        console.log("can't recognize the champion, getting teemo information instead");
-        return (getChampKeyByName('teemo'));
+        return (config.messages.SAD_MESSAGE);
     }
     return result[0];
 }
