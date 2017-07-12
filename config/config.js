@@ -11,7 +11,8 @@ module.exports.users = {
     '<TELEGRAM USERNAME>': { region: '<REGION>', summonerName: '<SUMMONER NAME>', gameRequest: true }
 }; 
 
-//messages
+// messages
 module.exports.messages = {
     SAD_MESSAGE : 'Something went wrong :('
 }
+

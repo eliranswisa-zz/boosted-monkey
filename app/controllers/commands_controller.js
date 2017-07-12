@@ -5,7 +5,6 @@ const staticData = require('../models/staticData');
 const config = require('../../config/config');
 const { Extra, Markup } = require('telegraf');
 
-
 /**
  * Reply ranked information.
  * @param {Object} ctx context object
@@ -30,7 +29,7 @@ exports.getRankedInformation = (ctx, next) => {
         }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
+            ctx.reply('Something went wrong :(');
         });
 };
 
@@ -58,7 +57,7 @@ exports.getTopMasteryChampions = (ctx, next) => {
         }).catch((result) => {
             // Reply with general error message.
             console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
+            ctx.reply('Something went wrong :(');
         });
 };
 
@@ -84,7 +83,7 @@ exports.getRecentGameInformation = (ctx, next) => {
             ctx.reply(result.gameInformationObject ? commandModel.parseRecentGameInformation(result.gameInformationObject, summonerName) : result.message, { parse_mode: 'Markdown' });
         }).catch((result) => {
             console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
+            ctx.reply('Something went wrong :(');
         });
 };
 
@@ -127,31 +126,9 @@ exports.getTopTwitchChannels = (ctx, next) => {
         })
         .catch((result) => {
             console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
+            ctx.reply('Something went wrong :(');
         });
 };
-
-/**
- * Reply a champion's highest winrate build according to championGG
- */
-exports.getHighestWinrateBuild = (ctx, next) => {
-
-    // Parse arguments 
-    parseArguments(ctx, 2);
-    ctx.args[0] = parseRole(ctx.args[0]);
-    if (!(isRole(ctx.args[0]))) {
-        ctx.args[1] = ctx.args[0];
-        ctx.args[0] = '';
-    }
-    commandModel.getHighestWinrateBuild(ctx.args[0], parseChampionName(ctx.args[1]))
-        .then((result) => {
-            ctx.reply(result, { parse_mode: 'Markdown' });
-        })
-        .catch((result) => {
-            console.log(result.message);
-            ctx.reply(config.messages.SAD_MESSAGE);
-        });
-}
 
 /**
  * Audit commands. Acts as a middleware.
@@ -182,13 +159,9 @@ const parseArguments = (ctx, num) => {
 
     // Remove double spaces, split by space and remove the command itself.
     const str = ctx.message.text.replace(/  +/g, ' ');
-
     const arr = str.split(' ');
-    let ret = arr.splice(1, num - 1);
-    ret.push(arr.splice(1).join(' '));
-
-    ctx.args = ret;
-};
+    let result = arr.splice(0, num);
+    result.push(arr.join(' '));
 
 /**
  * checks if a given string represents a role
