@@ -7,9 +7,11 @@ const commandsControllers = require('../controllers/commands_controller');
 const commands = (app, start) => {
 
     // Register bot username for group commands.
-    app.telegram.getMe().then((botInfo) => {
+    app.telegram.getMe()
+    .then((botInfo) => {
         app.options.username = botInfo.username;
     })
+    .catch((err) => console.log(err));
 
     // Accept commands only when program is running.
     app.use((ctx, next) => {

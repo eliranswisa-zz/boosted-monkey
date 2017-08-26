@@ -24,19 +24,68 @@ let summonerSpellsData = {};
 
 // Regions.
 const regionalEndpoints = {
-    'BR': { platformId: 'BR1', host: 'br.api.riotgames.com' },
-    'EUNE': { platformId: 'EUN1', host: 'eune.api.riotgames.com' },
-    'EUW': { platformId: 'EUW1', host: 'euw.api.riotgames.com' },
-    'JP': { platformId: 'JP1', host: 'jp.api.riotgames.com' },
+    'BR': { platformId: 'BR1', host: 'br1.api.riotgames.com' },
+    'EUNE': { platformId: 'EUN1', host: 'eun1.api.riotgames.com' },
+    'EUW': { platformId: 'EUW1', host: 'euw1.api.riotgames.com' },
+    'JP': { platformId: 'JP1', host: 'jp1.api.riotgames.com' },
     'KR': { platformId: 'KR', host: 'kr.api.riotgames.com' },
-    'LAN': { platformId: 'LA1', host: 'lan.api.riotgames.com' },
-    'LAS': { platformId: 'LA2', host: 'las.api.riotgames.com' },
-    'NA': { platformId: 'NA1', host: 'na.api.riotgames.com' },
-    'OCE': { platformId: 'OC1', host: 'oce.api.riotgames.com' },
-    'TR': { platformId: 'TR1', host: 'tr.api.riotgames.com' },
+    'LAN': { platformId: 'LA1', host: 'la1.api.riotgames.com' },
+    'LAS': { platformId: 'LA2', host: 'la2.api.riotgames.com' },
+    'NA': { platformId: 'NA1', host: 'na1.api.riotgames.com' },
+    'OCE': { platformId: 'OC1', host: 'oc1.api.riotgames.com' },
+    'TR': { platformId: 'TR1', host: 'tr1.api.riotgames.com' },
     'RU': { platformId: 'RU', host: 'ru.api.riotgames.com' },
-    'PBE': { platformId: 'PBE1', host: 'pbe.api.riotgames.com' }
+    'PBE': { platformId: 'PBE1', host: 'pbe1.api.riotgames.com' }
 };
+
+const queueTypes = {
+    0: 'Custom',
+    8: 'Normal 3v3',
+    2: 'Normal 5v5 Blind Pick',
+    14: 'Normal 5v5 Draft Pick',
+    4: 'Ranked Solo 5v5',
+    6: 'Ranked Premade 5v5',
+    9: 'Ranked Flex Twisted Treeline',
+    41: 'Ranked Team 3v3',
+    42: 'Ranked Team 5v5',
+    16: 'Dominion 5v5 Blind Pick',
+    17: 'Dominion 5v5 Draft Pick',
+    7: 'Coop vs AI',
+    25: 'Dominion Coop vs AI',
+    31: 'Coop vs AI Intro Bot',
+    32: 'Coop vs AI Beginner Bot',
+    33: 'Coop vs AI Intermediate Bot',
+    52: 'Twisted Treeline Coop vs AI',
+    61: 'Team Builder',
+    65: 'ARAM',
+    70: 'One for All',
+    72: 'Snowdown Showdown 1v1',
+    73: 'Snowdown Showdown 2v2',
+    75: '6x6 Hexakill',
+    76: 'Ultra Rapid Fire',
+    78: 'One for All',
+    83: 'Ultra Rapid Fire',
+    91: 'Doom Bots Rank 1',
+    92: 'Doom Bots Rank 2',
+    93: 'Doom Bots Rank 3',
+    96: 'Ascension',
+    98: 'Twisted Treeline 6x6 Hexakill',
+    100: 'Butcher\'s Bridge',
+    300: 'King Poro',
+    310: 'Nemesis',
+    313: 'Black Market Brawlers',
+    315: 'Nexus Siege',
+    317: 'Definitely Not Dominion',
+    318: 'All Random URF',
+    325: 'All Random Summoner\'s Rift',
+    400: 'Normal 5v5 Draft Pick',
+    410: 'Ranked 5v5 Draft Pick',
+    420: 'Ranked Solo Team Builder ',
+    430: 'Normal 5v5 Blind Pick',
+    440: 'Ranked Flex Summoner\'s Rift',
+    600: 'Blood Hunt Assassin',
+    610: 'Dark Star'
+}
 
 /**
  * Get static data.
@@ -45,7 +94,6 @@ const regionalEndpoints = {
  * @rejects {String} result.message
  */
 const getStaticDataFromServer = (data) => {
-    console.log(`gathering ${data} data from server...`);
     return new Promise((fulfill, reject) => {
 
         let result = {};
@@ -56,8 +104,7 @@ const getStaticDataFromServer = (data) => {
             reject(result);
         } else {
             let apiAddress = encodeURI(`https://${region}.api.riotgames.com/lol/static-data/v3/${data}?locale=en_US&dataById=false&api_key=${config.riotAPIKey}`);
-            // console.log(apiAddress);
-
+            console.log(apiAddress)
             request(apiAddress, (error, response, body) => {
                 if (error) {
                     console.error(error);
@@ -118,8 +165,8 @@ const dataToGet = [
 const init = () => {
     return new Promise((fulfill, reject) => {
         Promise.all(dataToGet).then(() => {
-            console.log("Done! got everything I need");
-            console.log();
+            console.log("Static data collected.");
+
             module.exports.championsObject = championsData;
             module.exports.itemsObject = itemsData;
             module.exports.masteriesObject = masteriesData;
@@ -132,5 +179,5 @@ const init = () => {
 
 init();
 
-// Regions.
+module.exports.queueTypes = queueTypes;
 module.exports.regionalEndpoints = regionalEndpoints;
