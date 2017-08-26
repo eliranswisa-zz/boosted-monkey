@@ -31,7 +31,7 @@ const getSummonerByName = (summonerName, region) => {
             fulfill(result);
         }
         else {
-            const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/api/lol/' + region + '/v1.4/summoner/by-name/' +
+            const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/lol/summoner/v3/summoners/by-name/' +
                 formattedName + '?api_key=' + config.riotAPIKey);
             console.info(apiAddress);
 
@@ -49,9 +49,7 @@ const getSummonerByName = (summonerName, region) => {
                 else if (response.statusCode == 200) {
 
                     const jsonObject = JSON.parse(body);
-                    const summonerObject = jsonObject[formattedName];
-
-                    result.summonerObject = summonerObject;
+                    result.summonerObject = jsonObject;
                     fulfill(result);
                 }
                 else {
@@ -143,9 +141,8 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                 else {
                     // Valid summoner.
                     const summonerObject = result.summonerObject;
-                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/championmastery/location/' +
-                        (staticData.regionalEndpoints[region]).platformId + '/player/' + summonerObject.id +
-                        '/topchampions?count=' + amountOfChampions + '&api_key=' + config.riotAPIKey);
+                    const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/lol/champion-mastery/v3/champion-masteries/by-summoner/' +
+                        summonerObject.id + '?api_key=' + config.riotAPIKey);
                     console.info(apiAddress);
 
                     // Send API request.
@@ -160,6 +157,7 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                             fulfill(masteryResult);
                         }
                         else if (response.statusCode == 200) {
+
                             const jsonObject = JSON.parse(body);
 
                             if (jsonObject.length == 0) {
@@ -167,7 +165,9 @@ exports.getTopMasteryChampions = (summonerName, region, amountOfChampions = 5) =
                                 fulfill(masteryResult);
                             }
                             else {
-                                masteryResult.topMasteryChampionsArray = jsonObject;
+                                // Grab the top N
+                                const topChampionsArray = jsonObject.slice(0, amountOfChampions);
+                                masteryResult.topMasteryChampionsArray = topChampionsArray;
                                 fulfill(masteryResult);
                             }
                         }
@@ -210,8 +210,8 @@ exports.getRankedInformation = (summonerName, region) => {
                 else {
                     // Valid summoner.
                     const summonerObject = result.summonerObject;
-                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v2.5/league/by-summoner/' +
-                        summonerObject.id + '/entry' + '?api_key=' + config.riotAPIKey);
+                    const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/lol/league/v3/positions/by-summoner/' +
+                        summonerObject.id + '?api_key=' + config.riotAPIKey);
                     console.log(apiAddress);
 
                     // Send API request.
@@ -226,6 +226,7 @@ exports.getRankedInformation = (summonerName, region) => {
                             fulfill(rankedResult);
                         }
                         else if (response.statusCode == 200) {
+
                             const jsonObject = JSON.parse(body);
 
                             if (jsonObject.length == 0) {
@@ -233,7 +234,7 @@ exports.getRankedInformation = (summonerName, region) => {
                                 fulfill(rankedResult);
                             }
                             else {
-                                rankedResult.rankedInformationArray = jsonObject[summonerObject.id];
+                                rankedResult.rankedInformationArray = jsonObject;
                                 fulfill(rankedResult);
                             }
                         }
@@ -275,8 +276,8 @@ exports.getRecentGameInformation = (summonerName, region) => {
                 else {
                     // Valid summoner. 
                     const summonerObject = result.summonerObject;
-                    const apiAddress = encodeURI('https://' + (staticData.regionalEndpoints[region]).host + '/api/lol/' + region + '/v1.3/game/by-summoner/' +
-                        summonerObject.id + '/recent' + '?api_key=' + config.riotAPIKey);
+                    const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/lol/match/v3/matchlists/by-account/' +
+                        summonerObject.accountId + '/recent' + '?api_key=' + config.riotAPIKey);
                     console.log(apiAddress);
 
                     // Send API request.
@@ -298,8 +299,29 @@ exports.getRecentGameInformation = (summonerName, region) => {
                                 fulfill(recentResult);
                             }
                             else {
-                                recentResult.gameInformationObject = jsonObject.games[0];
-                                fulfill(recentResult);
+                                const gameId = jsonObject.matches[0].gameId;
+                                const apiAddress = encodeURI('https://' + staticData.regionalEndpoints[region].host + '/lol/match/v3/matches/' +
+                                    gameId + '?api_key=' + config.riotAPIKey);
+                                console.log(apiAddress);
+
+                                // Send API request.
+                                request(apiAddress, (error, response, body) => {
+                                    if (error) {
+                                        console.error(error);
+                                        recentResult.message = config.messages.SAD_MESSAGE;
+                                        reject(recentResult);
+                                    }
+                                    else if (response.statusCode == 404) {
+                                        recentResult.message = 'No data for ' + summonerName;
+                                        fulfill(recentResult);
+                                    }
+                                    else if (response.statusCode == 200) {
+                                        
+                                        const jsonObject = JSON.parse(body);
+                                        recentResult.gameInformationObject = jsonObject;
+                                        fulfill(recentResult);
+                                    }
+                                });
                             }
                         }
                         else {
@@ -362,17 +384,17 @@ exports.parseRankedInformation = (rankedInformationArray, summonerName) => {
     for (let i = 0; i < rankedInformationArray.length; i++) {
 
         // Beautify queue type.
-        if (rankedInformationArray[i].queue == 'RANKED_SOLO_5x5')
+        if (rankedInformationArray[i].queueType == 'RANKED_SOLO_5x5')
             queueType = 'Solo/Duo';
-        else if (rankedInformationArray[i].queue == 'RANKED_FLEX_SR')
+        else if (rankedInformationArray[i].queueType == 'RANKED_FLEX_SR')
             queueType = 'Flex 5v5';
-        else if (rankedInformationArray[i].queue == 'RANKED_FLEX_TT')
+        else if (rankedInformationArray[i].queueType == 'RANKED_FLEX_TT')
             queueType = 'Flex 3v3';
         else
             queueType = 'General';
 
         rankedInformation += queueType + ' - ' + rankedInformationArray[i].tier + ' ' +
-            rankedInformationArray[i].entries[0].division + ' (' + rankedInformationArray[i].entries[0].leaguePoints + ' points) \n';
+            rankedInformationArray[i].rank + ' (' + rankedInformationArray[i].leaguePoints + ' points) \n';
     }
 
     return rankedInformation;
@@ -428,40 +450,42 @@ exports.parseRecentGameInformation = (gameInformationObject, summonerName) => {
     let recentGameInfo;
     let gameMode;
 
+    const formattedName = summonerName.toLowerCase().replace(/ /g, '');
+    
     // Game time
-    const minutesInGame = Math.floor(gameInformationObject.stats.timePlayed % 3600 / 60);
-    const secondsInGame = Math.floor(gameInformationObject.stats.timePlayed % 3600 % 60);
+    const minutesInGame = Math.floor(gameInformationObject.gameDuration % 3600 / 60);
+    const secondsInGame = Math.floor(gameInformationObject.gameDuration % 3600 % 60);
+
+    // Game mode
+    if (staticData.queueTypes[gameInformationObject.queueId])
+        gameMode = staticData.queueTypes[gameInformationObject.queueId];
+    else
+        gameMode = 'General';
+
+    // Get participant ID
+    const participantIdentityObject = gameInformationObject.participantIdentities.filter((participant) => participant.player.summonerName.toLowerCase() == formattedName)[0];
+    if (!participantIdentityObject) {
+        return config.SAD_MESSAGE;
+    }
+
+    const participantId = participantIdentityObject.participantId;
+    const participantData = gameInformationObject.participants.filter((participant) => participant.participantId == participantId)[0];
 
     // KDA
-    const championKills = gameInformationObject.stats.championsKilled === undefined ? 0 : gameInformationObject.stats.championsKilled;
-    const championDeaths = gameInformationObject.stats.numDeaths === undefined ? 0 : gameInformationObject.stats.numDeaths;
-    const championAssists = gameInformationObject.stats.assists === undefined ? 0 : gameInformationObject.stats.assists;
+    const championKills = participantData.stats.kills === undefined ? 0 : participantData.stats.kills;
+    const championDeaths = participantData.stats.deaths === undefined ? 0 : participantData.stats.deaths;
+    const championAssists = participantData.stats.assists === undefined ? 0 : participantData.stats.assists;
 
     // Creep Score
-    const minionsKilled = gameInformationObject.stats.minionsKilled === undefined ? 0 : gameInformationObject.stats.minionsKilled;
-    const neutralMinionsKilled = gameInformationObject.stats.neutralMinionsKilled === undefined ? 0 : gameInformationObject.stats.neutralMinionsKilled;
+    const minionsKilled = participantData.stats.totalMinionsKilled === undefined ? 0 : participantData.stats.totalMinionsKilled;
+    const neutralMinionsKilled = participantData.stats.neutralMinionsKilled === undefined ? 0 : participantData.stats.neutralMinionsKilled;
     const totalMinionKills = minionsKilled + neutralMinionsKilled;
 
     // Gold
-    const goldEarned = gameInformationObject.stats.goldEarned === undefined ? 0 : gameInformationObject.stats.goldEarned;
+    const goldEarned = participantData.stats.goldEarned === undefined ? 0 : participantData.stats.goldEarned;
 
     // Total damage dealt to champions
-    const totalDamageDealtToChampions = gameInformationObject.stats.totalDamageDealtToChampions === undefined ? 0 : gameInformationObject.stats.totalDamageDealtToChampions;
-
-    // Game mode
-    if (gameInformationObject.gameMode == 'CLASSIC') {
-        if (gameInformationObject.subType == 'RANKED_SOLO_5x5')
-            gameMode = 'Ranked Solo/Duo';
-        else if (gameInformationObject.subType == 'RANKED_FLEX_SR')
-            gameMode = 'Ranked Flex 5v5';
-        else if (gameInformationObject.subType == 'RANKED_FLEX_TT')
-            gameMode = 'Ranked Flex 3v3';
-        else
-            gameMode = gameInformationObject.subType;
-    }
-    else {
-        gameMode = gameInformationObject.gameMode;
-    }
+    const totalDamageDealtToChampions = participantData.stats.totalDamageDealtToChampions === undefined ? 0 : participantData.stats.totalDamageDealtToChampions;
 
     // Build recent game information string.
 
@@ -469,20 +493,24 @@ exports.parseRecentGameInformation = (gameInformationObject, summonerName) => {
     recentGameInfo = '*Recent Game - ' + summonerName + '*\n';
 
     // Game result
-    recentGameInfo += gameInformationObject.stats.win == true ? 'VICTORY - ' : 'DEFEAT - ';
+    recentGameInfo += participantData.stats.win == true ? 'VICTORY - ' : 'DEFEAT - ';
 
     // Game mode and time
     recentGameInfo += gameMode + ' (' + minutesInGame + ':' + secondsInGame + ')' + '\n';
 
     // Champion KDA
     recentGameInfo += championKills + '/' + championDeaths + '/' + championAssists +
-        ' as ' + (staticData.championsObject[gameInformationObject.championId]).name + '\n';
+        ' as ' + (staticData.championsObject[participantData.championId].name) + '\n';
 
     // CS and Gold.
     recentGameInfo += 'CS: ' + totalMinionKills + ', Gold: ' + goldEarned.toLocaleString('en-US') + '\n';
 
     // Total damage done
-    recentGameInfo += 'Total damage done: ' + totalDamageDealtToChampions.toLocaleString('en-US');
+    recentGameInfo += 'Total damage done: ' + totalDamageDealtToChampions.toLocaleString('en-US') + '\n';
+
+    // Match history link
+    recentGameInfo += 'http://matchhistory.eune.leagueoflegends.com/en/#match-details/' + participantIdentityObject.player.platformId + '/' + gameInformationObject.gameId
+        + '/' + participantIdentityObject.player.accountId;
 
     return recentGameInfo;
 
